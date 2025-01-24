@@ -1,0 +1,56 @@
+--select *
+--from NetflixMovies
+--limit 10;
+
+-- Find content added in the past 10 yrs 
+Select *,
+    --TO_DATE(release_date, 'Month DD, YYYY') if not date dtype
+from NetflixMovies
+where release_date >= CURRENT_DATE - INTERVAL '10 years'
+
+-- Find all movies directed by Stanley Kubrick with a score < 7.5
+select *
+from NetflixMovies
+Where director ILIKE('%Kubrick%')
+and vote_average <= 7.5
+order by vote_average asc
+
+-- Find a count of the # of movies with a rating > 7 and contain "comedy"
+select count(vote_average) as num_ratings
+from NetflixMovies
+where vote_average > 7
+and genres ILIKE('%Comedy%')
+
+-- Average popularity score for action movies
+Select avg(popularity) as avg_popularity
+  From NetflixMovies
+  where genres ILIKE('%action%')
+
+-- Finding all the movies where director is not listed
+select *
+from NetflixMovies
+where director isnull
+
+-- Find the Spielberg movies released in the last 10 yrs
+select *
+from NetflixMovies
+where director ILIKE('%Spielberg%')
+and release_date >= CURRENT_DATE - INTERVAL '10 years'
+
+-- Find the top 5 comedy directors and rank them by avg popularity
+select *, avg(popularity)
+over(
+partition by director) as avg_popularity
+from NetflixMovies
+where genres ILIKE('%comedy%')
+order by avg_popularity desc
+LIMIT 5
+
+-- If the genre is a thriller or horror, it'll be labeled "scary", if not it'' be "not scary"
+select *, CASE
+    WHEN genres ILIKE '%thriller%'
+    OR genres ILIKE '%horror%'
+    THEN 'scary'
+        ELSE 'not scary'
+    END category
+from NetflixMovies
